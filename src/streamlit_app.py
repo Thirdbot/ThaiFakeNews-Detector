@@ -6,11 +6,18 @@ from huggingface_hub import InferenceClient
 load_dotenv()
 ENDPOINT_URL = os.environ.get("HF_ENDPOINT_URL")
 
-SYSTEM_PROMPT = (
-    "คุณเป็นระบบตรวจสอบข่าวปลอมภาษาไทย "
-    "วิเคราะห์หัวข้อข่าวหรือเนื้อหาข่าวที่ได้รับ "
-    'แล้วตอบเพียง "ข่าวจริง" หรือ "ข่าวปลอม" เท่านั้น ไม่ต้องอธิบายเพิ่มเติม'
-)
+PROMPT_TEMPLATE = """Below is an instruction that describes a task, paired with an input that provides further context. Write a response that appropriately completes the request.
+
+    ### Instruction:
+    คุณเป็น AI ผู้เชี่ยวชาญด้านการตรวจสอบข่าวภาษาไทย กรุณาวิเคราะห์หัวข้อข่าวต่อไปนี้และตอบว่าเป็น "ข่าวจริง" หรือ "ข่าวปลอม" เท่านั้น
+
+    ### Input:
+    {}
+
+    ### Response:
+    """
+
+
 
 st.set_page_config(
     page_title="Thai Fake News Detector",
@@ -65,39 +72,42 @@ if run:
     else:
         with st.spinner("กำลังวิเคราะห์ข่าว…"):
             try:
-                client = InferenceClient(model=ENDPOINT_URL, token=os.environ.get("HF_TOKEN"))
+                client = InferenceClient(base_url=ENDPOINT_URL, api_key=os.environ.get("HF_TOKEN"))
 
-                prompt = (
-                    f"<|im_start|>system\n{SYSTEM_PROMPT}<|im_end|>\n"
-                    f"<|im_start|>user\n{news_input.strip()}<|im_end|>\n"
-                    "<|im_start|>assistant\n"
-                )
+                prompt = PROMPT_TEMPLATE.format(news_input)
 
-                raw = client.text_generation(
+                response = client.text_generation(
                     prompt,
                     max_new_tokens=20,
                     temperature=0.05,
-                    stop=["<|im_end|>"],
-                ).strip()
+                    do_sample=True,
+                )
 
-                is_fake = "ปลอม" in raw
+                generated = response.split("### Response:")[-1].strip()
+
+                is_fake = "ปลอม" in generated
 
                 st.markdown("---")
                 st.subheader("ผลการตรวจสอบ")
 
-                if is_fake:
+                if "จริง" in generated:
+                    st.success(
+                        "## ✅ ข่าวจริง\n\n"
+                        "โมเดลประเมินว่าข่าวนี้มีแนวโน้มเป็น **ข่าวจริง**",
+                    )
+                elif "ปลอม" in generated:
                     st.error(
                         "## ❌ ข่าวปลอม\n\n"
                         "โมเดลประเมินว่าข่าวนี้มีแนวโน้มเป็น **ข่าวปลอม**",
                     )
                 else:
-                    st.success(
-                        "## ✅ ข่าวจริง\n\n"
-                        "โมเดลประเมินว่าข่าวนี้มีแนวโน้มเป็น **ข่าวจริง**",
+                    st.error(
+                        "## ❌ ไม่่สามารถวิเคราะห์ได้\n\n"
+
                     )
 
                 with st.expander("ดูผลลัพธ์ดิบจากโมเดล"):
-                    st.code(raw, language=None)
+                    st.code(response, language=None)
 
             except Exception as exc:
                 st.error(f"เกิดข้อผิดพลาด: {exc}")
