@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 from huggingface_hub import InferenceClient
 
 load_dotenv()
-MODEL_ID = "Phantatt/qwen-thai-fakenews"
+ENDPOINT_URL = os.environ.get("HF_ENDPOINT_URL")
 
 SYSTEM_PROMPT = (
     "คุณเป็นระบบตรวจสอบข่าวปลอมภาษาไทย "
@@ -25,7 +25,7 @@ with st.sidebar:
         """
 - 🤗 [HF Space](https://huggingface.co/spaces/thirdExec/thai_fakenews_detector)
 - 💻 [Training Code](https://github.com/Thirdbot/FineTuneSloth)
-- 🧠 [Model](https://huggingface.co/Phantatt/qwen-thai-fakenews)
+- 🧠 [Model](https://huggingface.co/thirdExec/Qwen2.5-1.5B-Instruct-ThaiFakeNews-bnb-4bit)
 - 📊 [Dataset](https://huggingface.co/datasets/EXt1/Thai-True-Fake-News)
 """
     )
@@ -65,7 +65,7 @@ if run:
     else:
         with st.spinner("กำลังวิเคราะห์ข่าว…"):
             try:
-                client = InferenceClient(model=MODEL_ID, token=os.environ.get("HF_TOKEN"))
+                client = InferenceClient(model=ENDPOINT_URL, token=os.environ.get("HF_TOKEN"))
 
                 prompt = (
                     f"<|im_start|>system\n{SYSTEM_PROMPT}<|im_end|>\n"
