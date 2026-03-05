@@ -72,7 +72,7 @@ if run:
     else:
         with st.spinner("กำลังวิเคราะห์ข่าว…"):
             try:
-                client = InferenceClient(base_url=ENDPOINT_URL, api_key=os.environ.get("HF_TOKEN"))
+                client = InferenceClient(base_url=ENDPOINT_URL, token=os.environ.get("HF_TOKEN"))
 
                 prompt = PROMPT_TEMPLATE.format(news_input)
 
