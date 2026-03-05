@@ -6,19 +6,6 @@ from huggingface_hub import InferenceClient
 load_dotenv()
 ENDPOINT_URL = os.environ.get("HF_ENDPOINT_URL")
 
-PROMPT_TEMPLATE = """Below is an instruction that describes a task, paired with an input that provides further context. Write a response that appropriately completes the request.
-
-    ### Instruction:
-    คุณเป็น AI ผู้เชี่ยวชาญด้านการตรวจสอบข่าวภาษาไทย กรุณาวิเคราะห์หัวข้อข่าวต่อไปนี้และตอบว่าเป็น "ข่าวจริง" หรือ "ข่าวปลอม" เท่านั้น
-
-    ### Input:
-    {}
-
-    ### Response:
-    """
-
-
-
 st.set_page_config(
     page_title="Thai Fake News Detector",
     page_icon="🔍",
@@ -74,10 +61,8 @@ if run:
             try:
                 client = InferenceClient(base_url=ENDPOINT_URL, token=os.environ.get("HF_TOKEN"))
 
-                prompt = PROMPT_TEMPLATE.format(news_input)
-
                 response = client.text_generation(
-                    prompt,
+                    news_input.strip(),
                     max_new_tokens=20,
                     temperature=0.05,
                     do_sample=True,
