@@ -751,12 +751,12 @@ with st.sidebar:
 
 # ── Header ────────────────────────────────────────────────────────────────────
 st.markdown('<h1 class="main-title">ตรวจสอบข่าวปลอม</h1>', unsafe_allow_html=True)
-st.markdown('<p class="subtitle">Thai Fake News Detector · Powered by Qwen2.5-7B</p>', unsafe_allow_html=True)
+st.markdown('<p class="subtitle">Thai Fake News Detector · Powered by Qwen2.5-1.5B</p>', unsafe_allow_html=True)
 
 st.markdown("""
 <div class="info-box">
     <p>
-        โมเดลนี้ใช้ <strong style="color: #8b5cf6;">Qwen2.5-7B</strong> ที่ผ่านการ fine-tune 
+        โมเดลนี้ใช้ <strong style="color: #8b5cf6;">Qwen2.5-1.5B</strong> ที่ผ่านการ fine-tune 
         บนชุดข้อมูลข่าวภาษาไทย 6,004 บทความ เพื่อจำแนกว่าข่าวนั้นเป็น 
         <strong style="color: #10b981;">ข่าวจริง</strong> หรือ 
         <strong style="color: #ef4444;">ข่าวปลอม</strong>
@@ -775,15 +775,7 @@ news_input = st.text_area(
     key="news_input",
 )
 
-col1, col2 = st.columns([3, 1])
-with col1:
-    run = st.button("ตรวจสอบข่าว", type="primary", use_container_width=True)
-with col2:
-    clear = st.button("ล้างข้อมูล", use_container_width=True)
-
-if clear:
-    st.session_state.news_input = ""
-    st.rerun()
+run = st.button("ตรวจสอบข่าว", type="primary", use_container_width=True)
 
 # ── Inference ─────────────────────────────────────────────────────────────────
 if run:
